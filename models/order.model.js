@@ -1,4 +1,3 @@
-//
 import mongoose from "mongoose";
 
 const schema = mongoose.Schema({
@@ -15,6 +14,8 @@ const schema = mongoose.Schema({
     payment: String,
     total: String,
     userId: String,
+}, {
+    timestamps: true
 });
 
 export const Order = mongoose.model("Order", schema, "orders");

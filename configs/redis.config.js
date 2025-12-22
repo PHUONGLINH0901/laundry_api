@@ -12,8 +12,8 @@ export const client = createClient({
 export const connectRedis = async () => {
     try {
         await client.connect();
-        console.log("Ket noi voi redis thanh cong");
+        console.log("Ket noi redis thanh cong");
     } catch (error) {
-        console.log("Ket not voi redis that bai");
+        console.log("Ket not redis that bai");
     }
 }

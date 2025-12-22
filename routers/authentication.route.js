@@ -5,7 +5,6 @@ import { loginValidate, registerValidate } from "../validates/authentication.val
 import multer from "multer";
 import { storage } from "../helpers/cloudinary.helper.js";
 
-//
 const router = Router();
 
 const upload  = multer({
