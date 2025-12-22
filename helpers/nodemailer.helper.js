@@ -26,7 +26,7 @@ export const sendingEmail = (userEmail, otp) => {
         if (error) {
             console.log(error);
         } else {
-            console.log('Email sent otp: ' + info.response);
+            console.log('Email sent: ' + info.response);
         }
     });
 }

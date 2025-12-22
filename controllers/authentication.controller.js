@@ -59,7 +59,7 @@ export const otpConfirm = async (req, res) => {
         if(!rawData) {
             return res.status(404).json({
                 code: "error",
-                message: "Sai ma otp"
+                message: "Sai otp"
             })
         };
 
@@ -75,7 +75,7 @@ export const otpConfirm = async (req, res) => {
         console.log(error);
         res.status(400).json({
             code: "error",
-            message: "Loi ma otp"
+            message: "Loi otp"
         })
     }
 }
