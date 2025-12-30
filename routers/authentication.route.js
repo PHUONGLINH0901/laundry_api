@@ -5,12 +5,17 @@ import { loginValidate, registerValidate } from "../validates/authentication.val
 import multer from "multer";
 import { storage } from "../helpers/cloudinary.helper.js";
 
+import { getAdmins } from "../controllers/admin.controller.js";
+import { loginAdmin } from "../controllers/authentication.controller.js";
+
+
 const router = Router();
 
 const upload  = multer({
     storage: storage
 })
 
+//customer
 router.post("/register", registerValidate, registerController);
 
 router.post("/otp", otpConfirm);
@@ -21,6 +26,13 @@ router.get("/profile", usersMiddleware, profileContoller);
 
 router.put("/profile/edit", usersMiddleware, upload.single("image"), updateProfileController)
 
-router.get("/logout", logoutController)
+router.get("/logout", logoutController);
+
+//admin
+router.get("/admin", getAdmins);
+router.post("/admin/login", loginAdmin);
+
+
+
 
 export default router;

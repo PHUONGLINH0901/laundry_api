@@ -1,10 +1,13 @@
 import mongoose from "mongoose";
 
 export const database = async () => {
-    try {
-        await mongoose.connect(process.env.DATBASE_URL)
-        console.log("Ket noi database thanh cong!")
-    } catch (error) {
-        console.log("Ket noi database that bai!")
-    }
-}
+  try {
+    const url = process.env.DATABASE_URL;
+    if (!url) throw new Error("Lỗi DATABASE_URL");
+    await mongoose.connect(url);
+    console.log("Kết nối database thành công!");
+  } catch (error) {
+    console.log("Kết nối database thất bại!", error?.message);
+    throw error;
+  }
+};

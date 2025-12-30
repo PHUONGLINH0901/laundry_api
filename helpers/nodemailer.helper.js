@@ -18,7 +18,7 @@ export const sendingEmail = (userEmail, otp) => {
         from: process.env.APP_EMAIL,
         to: userEmail,
         subject: 'OTP XAC THUC',
-        text: `OTP XAC THUC EMAIL CUA BAN LA: ${otp}`
+        text: `OTP XAC THUC EMAIL DCUA BAN LA: ${otp}`
     };
 
     // Send the email
