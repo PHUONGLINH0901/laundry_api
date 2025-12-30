@@ -19,7 +19,7 @@ app.use(cors({
   credentials: true
 }));
 
-app.use("/api/client", clientRouter)
+app.use("/api/v1/laundry", clientRouter)
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

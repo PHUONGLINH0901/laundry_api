@@ -1,4 +1,5 @@
 import { Users } from "../models/users.model.js"
+import Admin from "../models/auth.admin.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 import { randomString } from "../helpers/randomString.helper.js";
@@ -190,3 +191,37 @@ export const logoutController = async (req, res) => {
         })
     }
 }
+
+export const loginAdmin = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    const admin = await Admin.findOne({ 
+      adminname: username, 
+      password: password 
+    });
+
+    if (!admin) {
+      return res.status(401).json({ 
+        success: false, 
+        message: "Sai tên đăng nhập hoặc mật khẩu!" 
+      });
+    }
+
+    if (admin.status !== 'active') {
+      return res.status(403).json({ 
+        success: false, 
+        message: "Tài khoản của bạn đang bị tạm khóa!" 
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: `Chào mừng ${admin.fullname} quay trở lại!`,
+      data: admin
+    });
+
+  } catch (error) {
+    res.status(500).json({ success: false, message: "Lỗi hệ thống!" });
+  }
+};
