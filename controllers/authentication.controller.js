@@ -81,32 +81,89 @@ export const otpConfirm = async (req, res) => {
     }
 }
 
+// export const loginController = async (req, res) => {
+//     try {
+//         const users = await Users.findOne({
+//             email: req.body.email
+//         });
+
+//         if(!users) {
+//             return res.status(404).json({
+//                 code: "error",
+//                 message: "Email hoac mat khau khong dung!"
+//             })
+//         };
+
+//         const decode = bcrypt.compareSync(req.body.password, users.password);
+
+//         if(!decode) {
+//             return res.status(404).json({
+//                 code: "error",
+//                 message: "Email hoac mat khau khong dung!"
+//             })
+//         }
+
+//         const token = jwt.sign({
+//             email: users.email,
+//             fullName: users.password
+//         }, process.env.JWT);
+
+//         res.cookie("token", token, {
+//             secure: false,
+//             httpOnly: true,
+//             sameSite: "lax",
+//             maxAge: 30 * 24 * 60 * 60 * 1000
+//         });
+
+//         res.json({
+//             code: "success",
+//             message: "Dang nhap thanh cong!"
+//         })
+//     } catch (error) {
+//         res.status(400).json({
+//             code: "error",
+//             message: "Dang nhap that bai!"
+//         })       
+//     }
+// }
+
 export const loginController = async (req, res) => {
     try {
-        const users = await Users.findOne({
+        const user = await Users.findOne({
             email: req.body.email
         });
 
-        if(!users) {
+        if (!user) {
             return res.status(404).json({
                 code: "error",
-                message: "Email hoac mat khau khong dung!"
-            })
-        };
-
-        const decode = bcrypt.compareSync(req.body.password, users.password);
-
-        if(!decode) {
-            return res.status(404).json({
-                code: "error",
-                message: "Email hoac mat khau khong dung!"
-            })
+                message: "Email hoặc mật khẩu không đúng!"
+            });
         }
 
-        const token = jwt.sign({
-            email: users.email,
-            fullName: users.password
-        }, process.env.JWT);
+        if (user.status === "lock") {
+            return res.status(403).json({
+                code: "error",
+                message: "Tài khoản đã bị khóa!"
+            });
+        }
+
+        const isMatch = bcrypt.compareSync(req.body.password, user.password);
+
+        if (!isMatch) {
+            return res.status(404).json({
+                code: "error",
+                message: "Email hoặc mật khẩu không đúng!"
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                email: user.email,
+                fullName: user.password, 
+            },
+            process.env.JWT,
+            { expiresIn: "30d" }
+        );
 
         res.cookie("token", token, {
             secure: false,
@@ -117,15 +174,17 @@ export const loginController = async (req, res) => {
 
         res.json({
             code: "success",
-            message: "Dang nhap thanh cong!"
-        })
+            message: "Đăng nhập thành công!"
+        });
+
     } catch (error) {
+        console.log(error);
         res.status(400).json({
             code: "error",
-            message: "Dang nhap that bai!"
-        })       
+            message: "Đăng nhập thất bại!"
+        });
     }
-}
+};
 
 export const profileContoller = async (req, res) => {
     try {
