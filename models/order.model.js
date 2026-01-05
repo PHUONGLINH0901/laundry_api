@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 
-const schema = mongoose.Schema({
+const schema = mongoose.Schema(
+  {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
     address: String,
     pakage: String,
     service: String,
@@ -13,9 +19,11 @@ const schema = mongoose.Schema({
     voucher: String,
     payment: String,
     total: String,
-    userId: String,
-}, {
-    timestamps: true
-});
+  },
+
+  {
+    timestamps: true, // ✅ TỰ SINH createdAt
+  }
+);
 
 export const Order = mongoose.model("Order", schema, "orders");

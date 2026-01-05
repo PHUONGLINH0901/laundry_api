@@ -5,8 +5,7 @@ import { loginValidate, registerValidate } from "../validates/authentication.val
 import multer from "multer";
 import { storage } from "../helpers/cloudinary.helper.js";
 
-import { getAdmins } from "../controllers/admin.controller.js";
-import { loginAdmin } from "../controllers/authentication.controller.js";
+
 
 
 const router = Router();
@@ -29,10 +28,7 @@ router.put("/profile/edit", usersMiddleware, upload.single("image"), updateProfi
 router.get("/logout", logoutController);
 
 //admin
-router.get("/admin", getAdmins);
-router.post("/admin/login", loginAdmin);
-
-
-
+// router.get("/admin", getAdmins);
+// router.post("/admin/login", loginAdmin);
 
 export default router;
