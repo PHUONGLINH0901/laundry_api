@@ -1,10 +1,11 @@
 import { Users } from "../models/users.model.js"
-import Admin from "../models/auth.admin.model.js";
+import Admin from "../models/admin.model.js";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken";
 import { randomString } from "../helpers/randomString.helper.js";
 import { client } from "../configs/redis.config.js";
 import { sendingEmail } from "../helpers/nodemailer.helper.js";
+
 export const registerController = async (req, res) => {
     try {
         const users = await Users.findOne({
@@ -81,51 +82,6 @@ export const otpConfirm = async (req, res) => {
     }
 }
 
-// export const loginController = async (req, res) => {
-//     try {
-//         const users = await Users.findOne({
-//             email: req.body.email
-//         });
-
-//         if(!users) {
-//             return res.status(404).json({
-//                 code: "error",
-//                 message: "Email hoac mat khau khong dung!"
-//             })
-//         };
-
-//         const decode = bcrypt.compareSync(req.body.password, users.password);
-
-//         if(!decode) {
-//             return res.status(404).json({
-//                 code: "error",
-//                 message: "Email hoac mat khau khong dung!"
-//             })
-//         }
-
-//         const token = jwt.sign({
-//             email: users.email,
-//             fullName: users.password
-//         }, process.env.JWT);
-
-//         res.cookie("token", token, {
-//             secure: false,
-//             httpOnly: true,
-//             sameSite: "lax",
-//             maxAge: 30 * 24 * 60 * 60 * 1000
-//         });
-
-//         res.json({
-//             code: "success",
-//             message: "Dang nhap thanh cong!"
-//         })
-//     } catch (error) {
-//         res.status(400).json({
-//             code: "error",
-//             message: "Dang nhap that bai!"
-//         })       
-//     }
-// }
 
 export const loginController = async (req, res) => {
     try {
@@ -251,36 +207,59 @@ export const logoutController = async (req, res) => {
     }
 }
 
+export const getAdmins = async (req, res) => {
+  try {
+    const data = await Admin.find();
+    res.status(200).json(data);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};
+
 export const loginAdmin = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    console.log("LOGIN ADMIN BODY:", req.body);
 
-    const admin = await Admin.findOne({ 
-      adminname: username, 
-      password: password 
+    const { fullname, password } = req.body;
+
+    if (!fullname || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu fullname hoặc password"
+      });
+    }
+
+    // Encode password để so với DB (DB đang lưu base64)
+    const passwordBase64 = Buffer.from(password, "utf-8").toString("base64");
+
+    const admin = await Admin.findOne({
+      fullname: fullname,
+      password: passwordBase64
     });
 
     if (!admin) {
-      return res.status(401).json({ 
-        success: false, 
-        message: "Sai tên đăng nhập hoặc mật khẩu!" 
+      return res.status(401).json({
+        success: false,
+        message: "Sai tên đăng nhập hoặc mật khẩu!"
       });
     }
 
-    if (admin.status !== 'active') {
-      return res.status(403).json({ 
-        success: false, 
-        message: "Tài khoản của bạn đang bị tạm khóa!" 
+    if (admin.status !== "active") {
+      return res.status(403).json({
+        success: false,
+        message: "Tài khoản của bạn đang bị tạm khóa!"
       });
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: `Chào mừng ${admin.fullname} quay trở lại!`,
       data: admin
     });
 
   } catch (error) {
-    res.status(500).json({ success: false, message: "Lỗi hệ thống!" });
+    console.error("LOGIN ADMIN ERROR:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi hệ thống!"
+    });
   }
 };
