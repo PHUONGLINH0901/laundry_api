@@ -1,32 +1,48 @@
-import express from "express";
-const router = express.Router();
+// import mongoose from "mongoose";
+// const schema = new mongoose.Schema({
+//   admin_picture_url: String, fullname: String, adminname: String,
+//   password: String, email: String, role: String, phone_number: String,
+//   status: String, dashboard_admin: { slogan: String },
+//   orders_management: { slogan: String }, services_management: { slogan: String },
+//   users_management: { slogan: String }, invoice_management: { slogan: String },
+//   permissions: {
+//     can_manage_orders: Boolean, can_manage_services: Boolean,
+//     can_manage_users: Boolean, can_manage_invoices: Boolean, can_edit_dashboard: Boolean
+//   }
+// }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+// export default mongoose.model("Admin", schema, "admin");
 
-import { getDevices } from "../controllers/device_management_controller.js";
-import { getRevenues } from "../controllers/total_revenue_controller.js";
-import { getAdmins } from "../controllers/admin_controller.js";
-import { getOrders, createOrder, updateOrderStatus } from "../controllers/orders_management_controller.js";
-import { getServices, addService, updateServicePrice } from "../controllers/services_management_controller.js";
-import { getUsers, addUser, updateUser, lockUser } from "../controllers/users_management_controller.js";
-import { getInventory, addInventoryItem } from "../controllers/inventory_management.js";
-import { loginAdmin } from "../controllers/auth_controller.js";
-import { validateUserData, validateUserId } from "../middlewares/user_middleware.js";
+import mongoose from "mongoose";
 
-router.get("/devices", getDevices);
-router.get("/revenues", getRevenues);
-router.get("/admins", getAdmins);
-router.get("/orders", getOrders);
-router.get("/services", getServices);
-router.get("/users", getUsers);
-router.get("/inventory", getInventory);
+const AdminSchema = new mongoose.Schema({
+  admin_picture_url: String,
+  fullname: String,
+  adminname: { type: String, required: true },
+  password: { type: String, required: true },
+  email: String,
+  role: String,
+  phone_number: String,
+  status: { type: String, default: "active" },
 
-router.post("/login", loginAdmin);
-router.post("/add/orders", createOrder);
-router.post("/created/inventory", addInventoryItem);
-router.post("/add/services", addService);
+  dashboard_admin: { slogan: String },
+  orders_management: { slogan: String },
+  services_management: { slogan: String },
+  users_management: { slogan: String },
+  invoice_management: { slogan: String },
 
-router.put("/services/:serviceId", updateServicePrice);
-router.put("/orders/:orderId/status", updateOrderStatus);
-router.put("/updated/users/:id", validateUserId, updateUser);
-router.patch("/users/:id/lock", validateUserId, lockUser);
+  permissions: {
+    can_manage_orders: { type: Boolean, default: false },
+    can_manage_services: { type: Boolean, default: false },
+    can_manage_users: { type: Boolean, default: false },
+    can_manage_invoices: { type: Boolean, default: false },
+    can_edit_dashboard: { type: Boolean, default: false }
+  }
+}, {
+  timestamps: { createdAt: "created_at", updatedAt: "updated_at" }
+});
 
-export default router;
+const Admin =
+  mongoose.models.Admin ||
+  mongoose.model("Admin", AdminSchema, "admin");
+
+export default Admin;

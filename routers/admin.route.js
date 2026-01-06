@@ -3,7 +3,7 @@ const router = express.Router();
 
 import { getDevices } from "../controllers/device_management_controller.js";
 // import { getRevenues } from "../controllers/total_revenue_controller.js";
-import { getAdmins } from "../controllers/admin.controller.js";
+import { getAdmins } from "../controllers/authentication.controller.js";
 // import { getOrders, createOrder, updateOrderStatus } from "../controllers/orders_management_controller.js";
 // import { getServices, addService, updateServicePrice } from "../controllers/services_management_controller.js";
 import { getUsers, addUser, updateUser, lockUser } from "../controllers/users.controller.js";

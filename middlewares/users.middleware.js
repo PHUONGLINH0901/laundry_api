@@ -1,39 +1,113 @@
-// 
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import { Users } from "../models/users.model.js";
+import Admin from "../models/admin.model.js";
 
 /**
- * Kiểm tra API Key (chỉ áp dụng cho production)
+ * Middleware xác thực theo role
+ * @param {"user" | "admin"} role
  */
-export const checkAccess = (req, res, next) => {
-    const apiKey = req.headers["x-api-key"];
+export const usersAuthMiddleware = (role) => {
+    return async (req, res, next) => {
+        try {
+            const token = req.cookies?.token;
 
-    if (process.env.NODE_ENV === "production" && !apiKey) {
-        return res.status(403).json({
-            code: "error",
-            message: "No API Key provided"
-        });
-    }
+            // 1. Không có token
+            if (!token) {
+                return res.status(401).json({
+                    code: "error",
+                    message: "Bạn cần đăng nhập trước!"
+                });
+            }
 
-    next();
+            // 2. Verify token
+            const decode = jwt.verify(token, process.env.JWT);
+
+            /* ================= USER ================= */
+            if (role === "user") {
+                if (decode.role !== "user") {
+                    return res.status(403).json({
+                        code: "error",
+                        message: "Không có quyền truy cập!"
+                    });
+                }
+
+                const user = await Users.findOne({ email: decode.email });
+
+                if (!user) {
+                    return res.status(401).json({
+                        code: "error",
+                        message: "User không hợp lệ!"
+                    });
+                }
+
+                if (user.status === "lock") {
+                    return res.status(403).json({
+                        code: "error",
+                        message: "Tài khoản đã bị khóa!"
+                    });
+                }
+
+                req.user = {
+                    id: user.id,
+                    email: user.email,
+                    fullName: user.fullName,
+                    role: "user"
+                };
+
+                return next();
+            }
+
+            /* ================= ADMIN ================= */
+            if (role === "admin") {
+                if (decode.role !== "admin") {
+                    return res.status(403).json({
+                        code: "error",
+                        message: "Không có quyền admin!"
+                    });
+                }
+
+                const admin = await Admin.findById(decode.id);
+
+                if (!admin) {
+                    return res.status(401).json({
+                        code: "error",
+                        message: "Admin không hợp lệ!"
+                    });
+                }
+
+                if (admin.status !== "active") {
+                    return res.status(403).json({
+                        code: "error",
+                        message: "Tài khoản admin đã bị khóa!"
+                    });
+                }
+
+                req.admin = {
+                    id: admin.id,
+                    username: admin.adminname,
+                    role: "admin"
+                };
+
+                return next();
+            }
+
+            // Role không hợp lệ
+            return res.status(403).json({
+                code: "error",
+                message: "Role không hợp lệ!"
+            });
+
+        } catch (error) {
+            return res.status(401).json({
+                code: "error",
+                message: "Token không hợp lệ hoặc đã hết hạn!"
+            });
+        }
+    };
 };
 
-/**
- * Validate dữ liệu user (create / update)
- */
-export const validateUserData = (req, res, next) => {
-    const { name, email, password } = req.body;
-
-    if (!name || !email || !password) {
-        return res.status(400).json({
-            code: "error",
-            message: "Missing required fields: name, email, password"
-        });
-    }
-
-    next();
-};
+/* ===================== ADMIN VALIDATION ===================== */
 
 /**
  * Validate MongoDB ObjectId
@@ -52,45 +126,17 @@ export const validateUserId = (req, res, next) => {
 };
 
 /**
- * Middleware xác thực user bằng JWT
+ * Validate body khi admin tạo / sửa user
  */
-export const usersMiddleware = async (req, res, next) => {
-    try {
-        const token = req.cookies?.token;
+export const validateUserData = (req, res, next) => {
+    const { name, email, password } = req.body;
 
-        if (!token) {
-            return res.status(401).json({
-                code: "error",
-                message: "Bạn cần đăng nhập trước!"
-            });
-        }
-
-        const decode = jwt.verify(token, process.env.JWT);
-
-        const user = await Users.findOne({ email: decode.email });
-
-        if (!user) {
-            return res.status(401).json({
-                code: "error",
-                message: "Bạn cần đăng nhập trước!"
-            });
-        }
-
-        // attach user info vào request
-        req.user = {
-            id: user.id,
-            fullName: user.fullName,
-            email: user.email,
-            image: user.image || "",
-            address: user.address || "",
-            phone: user.phone
-        };
-
-        next();
-    } catch (error) {
-        return res.status(401).json({
+    if (!name || !email || !password) {
+        return res.status(400).json({
             code: "error",
-            message: "Token không hợp lệ hoặc đã hết hạn!"
+            message: "Missing required fields: name, email, password"
         });
     }
+
+    next();
 };
