@@ -214,27 +214,12 @@ export const getAdmins = async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 };
 
+
 export const loginAdmin = async (req, res) => {
   try {
-    console.log("LOGIN ADMIN BODY:", req.body);
+    const { username, password } = req.body;
 
-    const { fullname, password } = req.body;
-
-    if (!fullname || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Thiếu fullname hoặc password"
-      });
-    }
-
-    // Encode password để so với DB (DB đang lưu base64)
-    const passwordBase64 = Buffer.from(password, "utf-8").toString("base64");
-
-    const admin = await Admin.findOne({
-      fullname: fullname,
-      password: passwordBase64
-    });
-
+    const admin = await Admin.findOne({ adminname: username });
     if (!admin) {
       return res.status(401).json({
         success: false,
@@ -242,24 +227,29 @@ export const loginAdmin = async (req, res) => {
       });
     }
 
-    if (admin.status !== "active") {
-      return res.status(403).json({
-        success: false,
-        message: "Tài khoản của bạn đang bị tạm khóa!"
-      });
-    }
+    const token = jwt.sign(
+      { id: admin._id, role: "admin" },
+      process.env.JWT,
+      { expiresIn: "7d" }
+    );
 
     return res.status(200).json({
       success: true,
       message: `Chào mừng ${admin.fullname} quay trở lại!`,
-      data: admin
+      token, // 🔥🔥🔥 BẮT BUỘC
+      data: {
+        id: admin._id,
+        fullname: admin.fullname,
+        adminname: admin.adminname,
+        role: "admin"
+      }
     });
 
-  } catch (error) {
-    console.error("LOGIN ADMIN ERROR:", error);
+  } catch (err) {
     return res.status(500).json({
       success: false,
       message: "Lỗi hệ thống!"
     });
   }
 };
+

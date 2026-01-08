@@ -1,4 +1,4 @@
-import Device from "../models/device_management_model.js";
+import Device from "../models/device.management.model.js";
 export const getDevices = async (req, res) => {
   try {
     const data = await Device.find();

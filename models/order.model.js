@@ -19,6 +19,7 @@ const schema = mongoose.Schema(
     voucher: String,
     payment: String,
     total: String,
+
   },
 
   {
