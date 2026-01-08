@@ -39,3 +39,47 @@ export const getAddServices = async (req, res) => {
     });
   }
 };
+
+export const updateServicePrice = async (req, res) => {
+  try {
+    const id = req.params.serviceId || req.params.id; 
+    
+    if (!id) {
+      return res.status(400).json({ message: "Missing service ID" });
+    }
+
+    const updatedService = await Service.findByIdAndUpdate(
+      id,
+      {
+        service_weight: Number(req.body.service_weight),
+        service_tags: req.body.service_tags
+      },
+      { new: true }
+    );
+
+    if (!updatedService) return res.status(404).json({ message: "Not Found" });
+    res.status(200).json(updatedService);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+export const addService = async (req, res) => {
+  try {
+    const { service_name, status, discount, default_type, service_weight, service_duration, feedback_score, service_capacity, service_tags } = req.body;
+    const newService = await Service.addService({
+      service_name,
+      status,
+      discount,
+      default_type,
+      service_weight,
+      service_duration,
+      feedback_score,
+      service_capacity,
+      service_tags
+    });
+    res.status(201).json(newService);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

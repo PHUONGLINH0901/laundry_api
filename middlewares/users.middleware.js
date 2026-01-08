@@ -10,7 +10,12 @@ import Admin from "../models/admin.model.js";
 export const usersAuthMiddleware = (role) => {
     return async (req, res, next) => {
         try {
-            const token = req.cookies?.token;
+           const authHeader = req.headers.authorization;
+            const token =
+                authHeader && authHeader.startsWith("Bearer ")
+                    ? authHeader.split(" ")[1]
+                    : req.cookies?.token;
+
 
             // 1. Không có token
             if (!token) {
@@ -140,3 +145,4 @@ export const validateUserData = (req, res, next) => {
 
     next();
 };
+

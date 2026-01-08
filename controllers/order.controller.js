@@ -1,4 +1,6 @@
 import { Order } from "../models/order.model.js";
+import { Users } from "../models/users.model.js";
+
 
 export const createOrder = async (req, res) => {
   try {
@@ -22,24 +24,60 @@ export const createOrder = async (req, res) => {
 };
 
 export const getOrder = async (req, res) => {
-    try {
-        const id = req.users.id;
+  try {
+    let orders;
 
-        const orders = await Order.find({
-            userId: id
-        });
+    if (req.admin) {
+      orders = await Order.find().sort({ createdAt: -1 });
 
-        res.json({
-            code: "success",
-            data: orders
-        })
-    } catch (error) {
-        res.status(400).json({
-            code: "error",
-            message: "Loi truy van order"
-        })
+      const userIds = orders.map(o => o.userId).filter(Boolean);
+
+      const users = await Users.find(
+        { _id: { $in: userIds } },
+        { fullName: 1, phone: 1, email: 1 }
+      );
+
+      // map userId => user
+      const userMap = {};
+      users.forEach(u => {
+        userMap[u._id.toString()] = u;
+      });
+
+      // gắn fullName vào order
+      orders = orders.map(o => ({
+        ...o.toObject(),
+        customer: userMap[o.userId?.toString()] || null
+      }));
     }
-}
+
+    else if (req.user) {
+      orders = await Order.find({ userId: req.user.id }).sort({ createdAt: -1 });
+    }
+
+    else {
+      return res.status(401).json({
+        code: "error",
+        message: "Chưa xác thực"
+      });
+    }
+
+    res.json({
+      code: "success",
+      data: orders
+    });
+
+  } catch (error) {
+    console.error("ORDER ERROR:", error);
+    res.status(500).json({
+      code: "error",
+      message: "Lỗi truy vấn order"
+    });
+  }
+};
+
+
+
+
 
 export const deleteOrder = async (req, res) => {
     try {
@@ -73,3 +111,17 @@ export const deleteOrder = async (req, res) => {
         })
     }
 }
+
+export const updateOrderStatus = async (req, res) => {
+  try {
+    const { orderId } = req.params;
+    const { status } = req.body;
+    const updatedOrder = await Order.findByIdAndUpdate(
+      orderId,
+      { status },
+      { new: true }
+    );
+    if (!updatedOrder) return res.status(404).json({ message: "Not Found" });
+    res.status(200).json(updatedOrder);
+  } catch (err) { res.status(500).json({ error: err.message }); }
+};

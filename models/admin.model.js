@@ -1,17 +1,3 @@
-// import mongoose from "mongoose";
-// const schema = new mongoose.Schema({
-//   admin_picture_url: String, fullname: String, adminname: String,
-//   password: String, email: String, role: String, phone_number: String,
-//   status: String, dashboard_admin: { slogan: String },
-//   orders_management: { slogan: String }, services_management: { slogan: String },
-//   users_management: { slogan: String }, invoice_management: { slogan: String },
-//   permissions: {
-//     can_manage_orders: Boolean, can_manage_services: Boolean,
-//     can_manage_users: Boolean, can_manage_invoices: Boolean, can_edit_dashboard: Boolean
-//   }
-// }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
-// export default mongoose.model("Admin", schema, "admin");
-
 import mongoose from "mongoose";
 
 const AdminSchema = new mongoose.Schema({
