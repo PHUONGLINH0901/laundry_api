@@ -23,6 +23,7 @@ router.post("/login", loginAdmin);
 router.post("/add/orders", createOrder);
 router.post("/created/inventory", addInventoryItem);
 router.post("/add/services", addService);
+router.post("/add/users",usersAuthMiddleware("admin"),validateUserData,addUser);
 
 router.put("/services/:serviceId", updateServicePrice);
 router.put("/orders/:orderId/status", updateOrderStatus);

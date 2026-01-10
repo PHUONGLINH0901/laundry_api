@@ -4,7 +4,7 @@ export const getServices = async (req, res) => {
   try {
     const services = await Service.find({
       status: "open",
-      service_tags: "hot",
+      // service_tags: "hot",
     });
 
     res.json({
@@ -66,9 +66,9 @@ export const updateServicePrice = async (req, res) => {
 
 export const addService = async (req, res) => {
   try {
-    const { service_name, status, discount, default_type, service_weight, service_duration, feedback_score, service_capacity, service_tags } = req.body;
-    const newService = await Service.addService({
+    const {
       service_name,
+      description,
       status,
       discount,
       default_type,
@@ -76,10 +76,30 @@ export const addService = async (req, res) => {
       service_duration,
       feedback_score,
       service_capacity,
-      service_tags
+      service_tags,
+    } = req.body;
+
+    const newService = new Service({
+      service_name,
+      description,
+      status,
+      discount,
+      default_type,
+      service_weight,
+      service_duration,
+      feedback_score,
+      service_capacity,
+      service_tags,
+      created_at: new Date(),
+      updated_at: new Date(),
     });
+
+    await newService.save();
+
     res.status(201).json(newService);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 };
+

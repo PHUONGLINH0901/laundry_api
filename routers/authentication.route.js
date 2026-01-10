@@ -21,7 +21,7 @@ router.post("/otp", otpConfirm);
 
 router.post("/login", loginValidate, loginController);
 
-router.get("/profile", usersAuthMiddleware, profileContoller);
+router.get("/profile", usersAuthMiddleware("user"), profileContoller);
 
 router.put("/profile/edit", usersAuthMiddleware, upload.single("image"), updateProfileController)
 

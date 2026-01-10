@@ -20,8 +20,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+// app.use(cors({
+//   origin: "http://localhost:9104",
+//   methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: "http://localhost:9104",
+  origin: true,
   methods: ["GET", "PUT", "POST", "PATCH", "DELETE"],
   credentials: true
 }));

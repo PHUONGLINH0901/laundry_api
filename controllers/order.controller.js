@@ -76,9 +76,6 @@ export const getOrder = async (req, res) => {
 };
 
 
-
-
-
 export const deleteOrder = async (req, res) => {
     try {
         const { id } = req.params;
