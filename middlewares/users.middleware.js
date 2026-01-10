@@ -37,7 +37,7 @@ export const usersAuthMiddleware = (role) => {
                     });
                 }
 
-                const user = await Users.findOne({ email: decode.email });
+                const user = await Users.findById(decode.id  );
 
                 if (!user) {
                     return res.status(401).json({
@@ -134,15 +134,16 @@ export const validateUserId = (req, res, next) => {
  * Validate body khi admin tạo / sửa user
  */
 export const validateUserData = (req, res, next) => {
-    const { name, email, password } = req.body;
+    const { fullName, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!fullName || !email || !password) {
         return res.status(400).json({
             code: "error",
-            message: "Missing required fields: name, email, password"
+            message: "Missing required fields: fullName, email, password"
         });
     }
 
     next();
 };
+
 

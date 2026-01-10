@@ -114,12 +114,14 @@ export const loginController = async (req, res) => {
 
         const token = jwt.sign(
             {
+                id: user._id,          // ✅ THÊM
                 email: user.email,
-                fullName: user.password, 
+                role: "user"           // ✅ THÊM – BẮT BUỘC
             },
             process.env.JWT,
             { expiresIn: "30d" }
         );
+
 
         res.cookie("token", token, {
             secure: false,
@@ -146,8 +148,9 @@ export const profileContoller = async (req, res) => {
     try {
         res.json({
             code: "success",
-            data: req.users
-        })
+            data: req.user
+        });
+
     } catch (error) {
         res.status(400).json({
             code: "error",
@@ -215,15 +218,32 @@ export const getAdmins = async (req, res) => {
 };
 
 
+
 export const loginAdmin = async (req, res) => {
   try {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: "Thiếu username hoặc password",
+      });
+    }
+
+    // TÌM THEO adminname (đúng với DB)
     const admin = await Admin.findOne({ adminname: username });
     if (!admin) {
       return res.status(401).json({
         success: false,
-        message: "Sai tên đăng nhập hoặc mật khẩu!"
+        message: "Sai tên đăng nhập hoặc mật khẩu!",
+      });
+    }
+
+    // ❗ TẠM THỜI SO SÁNH CHUỖI THƯỜNG
+    if (admin.password !== password) {
+      return res.status(401).json({
+        success: false,
+        message: "Sai tên đăng nhập hoặc mật khẩu!",
       });
     }
 
@@ -236,20 +256,25 @@ export const loginAdmin = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: `Chào mừng ${admin.fullname} quay trở lại!`,
-      token, // 🔥🔥🔥 BẮT BUỘC
+      token,
       data: {
         id: admin._id,
         fullname: admin.fullname,
         adminname: admin.adminname,
-        role: "admin"
-      }
+        role: "admin",
+      },
     });
 
   } catch (err) {
+    console.error("LOGIN ERROR:", err);
     return res.status(500).json({
       success: false,
-      message: "Lỗi hệ thống!"
+      message: "Lỗi hệ thống!",
     });
   }
 };
+
+
+
+
 
